@@ -1,39 +1,53 @@
 package clas;
 
+
+import objects.Object3D;
 import objects.Sphere;
 
 public class Intersection {
-    public static boolean intersection(Ray ray, Sphere sphere){
 
-        boolean punch=false;
-        Vector L = new Vector(sphere.getX()-ray.getX(), sphere.getY()- ray.getY(), sphere.getZ()- ray.getZ());
-        double L2 = (L.getX()* L.getX()) + (L.getY()* L.getY()) + (L.getZ()* L.getZ());
-        double tca =L.getX()*ray.getDirection().getX()+
-                    L.getY()*ray.getDirection().getY()+
-                    L.getZ()*ray.getDirection().getZ();
-        if(tca<0){
-            return false;
-        }else {
-            double d = Math.sqrt((L2-tca*tca));
-            //System.out.println("true    d = "+L2+"   tca = "+tca*tca);
+    private double distance;
+    private Vector position;
+    private Vector normal;
+    private Object3D object;
 
-            //return true;
-
-            if (d<0){
-                return false;
-            }else {
-
-                double thc = Math.sqrt(sphere.getRadius()*sphere.getRadius()-d*d);
-                double t0 = tca -thc;
-                double t1 = tca +thc;
-                System.out.println("true  t0 ="+t0+"  t1="+t1);
-                if (t0 ==t1 || (t0>0 && t1>0)){
-                    //System.out.println("true");
-                    punch = true;
-                }
-            }
-        }
-
-        return punch;
+    public Intersection(Vector position, double distance, Vector normal, Object3D object) {
+        setPosition(position);
+        setDistance(distance);
+        setNormal(normal);
+        setObject(object);
     }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public Vector getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector position) {
+        this.position = position;
+    }
+
+    public Vector getNormal() {
+        return normal;
+    }
+
+    public void setNormal(Vector normal) {
+        this.normal = normal;
+    }
+
+    public Object3D getObject() {
+        return object;
+    }
+
+    public void setObject(Object3D object) {
+        this.object = object;
+    }
+
 }

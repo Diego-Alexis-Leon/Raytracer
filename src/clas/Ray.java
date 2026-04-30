@@ -2,21 +2,28 @@ package clas;
 
 import objects.Camera;
 
-public class Ray extends Vector{
-    Vector direction;
+public class Ray {
+    private Vector origin;
+    private Vector direction;
 
-    public Ray(Camera camera, Vector pixel) {
-        super(camera.getX(), camera.getY(), camera.getZ()); //origin of ray
+    public Ray(Vector origin, Vector direction) {
+        setOrigin(origin);
+        setDirection(direction);
+    }
 
-        double Ax = pixel.getX()-camera.getX();
-        double Ay = pixel.getY()-camera.getY();
-        double Az = pixel.getZ()-camera.getZ();
-        double v = Math.sqrt(Ax*Ax+Ay*Ay+Az*Az);
+    public Vector getOrigin() {
+        return origin;
+    }
 
-        this. direction = new Vector(Ax/v,Ay/v,Az/v);
+    public void setOrigin(Vector origin) {
+        this.origin = origin;
     }
 
     public Vector getDirection() {
-        return direction;
+        return Vector.normalize(direction);
+    }
+
+    public void setDirection(Vector direction) {
+        this.direction = direction;
     }
 }

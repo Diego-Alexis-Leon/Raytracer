@@ -1,29 +1,115 @@
 package objects;
 
+import clas.Intersection;
+import clas.Ray;
+import clas.Vector;
+
 import java.awt.*;
 
 public class Camera extends Object3D{
-    double x2;
-    double y2;
-    double z2;
 
-    public Camera(double x, double y, double z, Color color,
-                  double x2, double y2, double z2) {
-        super(x, y, z, color);
-        this. x2 = x2;
-        this. y2 = y2;
-        this. z2 = z2;
+    private double[] fieldOfView = new double[2];
+    private double defaultZ = 15.0;
+    private int[] resolution = new int[2];
+
+    public Camera(Vector position, double fovH, double fovV, int width, int height) {
+        super(position, Color.BLACK);
+        setFOV(fovH, fovV);
+        setResolution(width, height);
     }
 
-    public double getX2() {
-        return x2;
+    public double[] getFieldOfView() {
+        return fieldOfView;
     }
 
-    public double getY2() {
-        return y2;
+    private void setFieldOfView(double[] fieldOfView) {
+        this.fieldOfView = fieldOfView;
     }
 
-    public double getZ2() {
-        return z2;
+    public double getFOVHorizontal() {
+        return fieldOfView[0];
+    }
+
+    public double getFOVVertical() {
+        return fieldOfView[1];
+    }
+
+    public void setFOVHorizontal(double fovH) {
+        fieldOfView[0] = fovH;
+    }
+
+    public void setFOVVertical(double fovV) {
+        fieldOfView[1] = fovV;
+    }
+
+    public void setFOV(double fovH, double fovV) {
+        setFOVHorizontal(fovH);
+        setFOVVertical(fovV);
+    }
+
+    public double getDefaultZ() {
+        return defaultZ;
+    }
+
+    public void setDefaultZ(double defaultZ) {
+        this.defaultZ = defaultZ;
+    }
+
+    public int[] getResolution() {
+        return resolution;
+    }
+
+    public void setResolutionWidth(int width) {
+        resolution[0] = width;
+    }
+
+    public void setResolutionHeight(int height) {
+        resolution[1] = height;
+    }
+
+    public void setResolution(int width, int height) {
+        setResolutionWidth(width);
+        setResolutionHeight(height);
+    }
+
+    public int getResolutionWidth() {
+        return resolution[0];
+    }
+
+    public int getResolutionHeight() {
+        return resolution[1];
+    }
+
+    public Vector[][] calculatePositionsToRay() {
+        // Horizontal boundary
+        double angleMaxX = Math.toRadians(getFOVHorizontal() / 2.0);
+        double maxX = getDefaultZ() * Math.tan(angleMaxX);
+        double minX = -maxX;
+
+        // Vertical boundary
+        double angleMaxY = Math.toRadians(getFOVVertical() / 2.0);
+        double maxY = getDefaultZ() * Math.tan(angleMaxY);
+        double minY = -maxY;
+
+        // Set grid positions
+        Vector[][] positions = new Vector[getResolutionWidth()][getResolutionHeight()];
+        double posZ = getDefaultZ();
+
+        double stepX = (maxX - minX) / getResolutionWidth();
+        double stepY = (maxY - minY) / getResolutionHeight();
+        for(int x = 0; x < positions.length; x++){
+            for(int y = 0; y < positions[x].length; y++){
+                double posX = minX + (stepX * x);
+                double posY = maxY - (stepY * y);
+                positions[x][y] = new Vector(posX, posY, posZ);
+            }
+        }
+
+        return positions;
+    }
+
+    @Override
+    public Intersection getIntersection(Ray ray) {
+        return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null);
     }
 }
