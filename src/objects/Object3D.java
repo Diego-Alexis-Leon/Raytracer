@@ -1,5 +1,6 @@
 package objects;
 
+import clas.FlatShading;
 import clas.Intersection;
 import clas.Ray;
 import clas.Vector;
@@ -18,6 +19,11 @@ public abstract class Object3D {
     public Color getColor() {
         return color;
     }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
     public Vector getPosition() {
         return position;
     }
@@ -27,5 +33,7 @@ public abstract class Object3D {
     }
 
     public abstract Intersection getIntersection(Ray ray);
+
+    //public abstract Color calculateDiffuce(FlatShading light);
 
 }

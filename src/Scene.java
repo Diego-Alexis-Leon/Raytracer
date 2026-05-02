@@ -1,4 +1,5 @@
 
+import clas.FlatShading;
 import objects.Camera;
 import objects.Object3D;
 
@@ -10,6 +11,7 @@ import java.util.List;
 public class Scene {
     Camera camera;
     java.util.List<Object3D> objects;
+    FlatShading ligth;
     Color defaultColor;
 
     public Scene(Color defaultColor) {
@@ -46,5 +48,13 @@ public class Scene {
 
     public void setObjects(List<Object3D> objects) {
         this.objects = objects;
+    }
+
+    public FlatShading getLigth() {
+        return ligth;
+    }
+
+    public void setLigth(FlatShading ligth) {
+        this.ligth = ligth;
     }
 }

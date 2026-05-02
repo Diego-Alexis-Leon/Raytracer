@@ -30,6 +30,7 @@ public class Triangle implements Interface {
     }
 
     public Vector getNormal(){
+        //return new Vector(1,1,1);
         return Vector.ZERO();
     }
 

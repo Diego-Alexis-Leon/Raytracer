@@ -52,7 +52,12 @@ public class Model3D extends Object3D {
                     (intersectionDistance < distance || distance < 0)){
                 distance = intersectionDistance;
                 position = Vector.add(ray.getOrigin(), Vector.scalarMultiplication(ray.getDirection(), distance));
-                normal = triangle.getNormal();
+
+                Vector[] vertex = triangle.getVertices();
+                Vector v = Vector.substract(vertex[1],vertex[0]);
+                Vector w = Vector.substract(vertex[0],vertex[2]);
+                //normal = triangle.getNormal();
+                normal = Vector.normalize(Vector.crossProduct(v,w));
             }
         }
 
@@ -135,11 +140,11 @@ public class Model3D extends Object3D {
 
         for (int[] triangle : caras){
             if (triangle.length > 3){ // verifica si una cara tiene 3 o 4 vertices.
-                temporalList.add(new Triangle(vectors.get(triangle[0]),vectors.get(triangle[1]),vectors.get(triangle[2])));
-                temporalList.add(new Triangle(vectors.get(triangle[0]),vectors.get(triangle[2]),vectors.get(triangle[3])));
+                temporalList.add(new Triangle(vectors.get(triangle[1]),vectors.get(triangle[0]),vectors.get(triangle[2])));
+                temporalList.add(new Triangle(vectors.get(triangle[2]),vectors.get(triangle[0]),vectors.get(triangle[3])));
                 //System.out.println("Vertices="+triangle.length+" "+triangle[0]+" "+triangle[1]+" "+triangle[2]+" "+triangle[3]);
             }else {
-                temporalList.add(new Triangle(vectors.get(triangle[0]),vectors.get(triangle[1]),vectors.get(triangle[2])));
+                temporalList.add(new Triangle(vectors.get(triangle[1]),vectors.get(triangle[0]),vectors.get(triangle[2])));
                 //System.out.println("Vertices="+triangle.length+" "+triangle[0]+" "+triangle[1]+" "+triangle[2]);
             }
         }

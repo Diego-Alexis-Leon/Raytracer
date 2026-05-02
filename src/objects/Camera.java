@@ -1,5 +1,6 @@
 package objects;
 
+import clas.FlatShading;
 import clas.Intersection;
 import clas.Ray;
 import clas.Vector;
