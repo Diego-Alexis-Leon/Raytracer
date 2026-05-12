@@ -1,19 +1,19 @@
 package objects;
 
-import clas.FlatShading;
+import clas.Interface;
 import clas.Intersection;
 import clas.Ray;
 import clas.Vector;
 
 import java.awt.*;
 
-public abstract class Object3D {
+public abstract class Object3D implements Interface {
     Color color;
     private Vector position;
 
     public Object3D(Vector position, Color color) {
         setPosition(position);
-        this. color = color;
+        setColor(color);
     }
 
     public Color getColor() {

@@ -1,5 +1,6 @@
 
-import clas.FlatShading;
+import Lights.Light;
+import Lights.pointLight;
 import objects.Camera;
 import objects.Object3D;
 
@@ -11,12 +12,13 @@ import java.util.List;
 public class Scene {
     Camera camera;
     java.util.List<Object3D> objects;
-    FlatShading ligth;
+    java.util.List<Light> light;
     Color defaultColor;
 
     public Scene(Color defaultColor) {
         setDefaultColor(defaultColor);
         setObjects(new ArrayList<>());
+        setLight(new ArrayList<>());
     }
 
     public Color getDefaultColor() {
@@ -35,6 +37,8 @@ public class Scene {
         this.camera = camera;
     }
 
+
+
     public void addObject(Object3D object){
         getObjects().add(object);
     }
@@ -50,11 +54,18 @@ public class Scene {
         this.objects = objects;
     }
 
-    public FlatShading getLigth() {
-        return ligth;
+    public List<Light> getLight() {
+        if(light == null){
+            light = new ArrayList<>();
+        }
+        return light;
     }
 
-    public void setLigth(FlatShading ligth) {
-        this.ligth = ligth;
+    public void setLight(List<Light> ligth) {
+        this.light = ligth;
+    }
+
+    public void addLight(Light light){
+        getLight().add(light);
     }
 }

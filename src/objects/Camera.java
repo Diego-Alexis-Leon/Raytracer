@@ -1,6 +1,5 @@
 package objects;
 
-import clas.FlatShading;
 import clas.Intersection;
 import clas.Ray;
 import clas.Vector;
@@ -12,11 +11,13 @@ public class Camera extends Object3D{
     private double[] fieldOfView = new double[2];
     private double defaultZ = 15.0;
     private int[] resolution = new int[2];
+    private double[] nearFarPlanes = new double[2];
 
-    public Camera(Vector position, double fovH, double fovV, int width, int height) {
+    public Camera(Vector position, double fovH, double fovV, int width, int height, double nearPlane, double farPlane) {
         super(position, Color.BLACK);
         setFOV(fovH, fovV);
         setResolution(width, height);
+        setNearFarPlanes(new double[]{nearPlane, farPlane});
     }
 
     public double[] getFieldOfView() {
@@ -79,6 +80,13 @@ public class Camera extends Object3D{
 
     public int getResolutionHeight() {
         return resolution[1];
+    }
+
+    private void setNearFarPlanes(double[] nearFarPlanes) {
+        this.nearFarPlanes = nearFarPlanes;
+    }
+    public double[] getNearFarPlanes() {
+        return nearFarPlanes;
     }
 
     public Vector[][] calculatePositionsToRay() {

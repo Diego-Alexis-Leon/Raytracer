@@ -15,6 +15,15 @@ public class Triangle implements Interface {
         setNormals(null);
     }
 
+    public Triangle(Vector[] vertices, Vector[] normals) {
+        if(vertices.length == 3){
+            setVertices(vertices[0], vertices[1], vertices[2]);
+        } else {
+            setVertices(Vector.ZERO(),Vector.ZERO(),Vector.ZERO());
+        }
+        setNormals(normals);
+    }
+
     public Vector[] getVertices() {
         return vertices;
     }
@@ -30,16 +39,44 @@ public class Triangle implements Interface {
     }
 
     public Vector getNormal(){
-        //return new Vector(1,1,1);
-        return Vector.ZERO();
+        Vector normal = Vector.ZERO();// 0,0,0
+        Vector[] normals = this.normals;// null  or  u,v,w
+
+        // si se usa este metodo pero no se le dieron normales al triangulo, calcula la normal con los vertices
+        if(normals == null) {
+            Vector[] vertices = getVertices();
+            Vector v = Vector.substract(vertices[1], vertices[0]);
+            Vector w = Vector.substract(vertices[0], vertices[2]);
+            normal = Vector.normalize(Vector.crossProduct(v, w));
+        } else {
+            // si el triangulo si tiene normales las reasigna a la variable "normal"
+            // para que las regrese al final del metodo
+            for(int i = 0; i < normals.length; i++) {
+                normal.setX(normal.getX() + normals[i].getX());
+                normal.setY(normal.getY() + normals[i].getY());
+                normal.setZ(normal.getZ() + normals[i].getZ());
+            }
+            normal.setX(normal.getX() / normals.length);
+            normal.setY(normal.getY() / normals.length);
+            normal.setZ(normal.getZ() / normals.length);
+        }
+        return normal;
     }
 
     public Vector[] getNormals() {
+        if (normals == null) {
+            Vector normal = getNormal();
+            setNormals(new Vector[]{normal, normal, normal});
+        }
         return normals;
     }
 
     private void setNormals(Vector[] normals) {
         this.normals = normals;
+    }
+
+    public void setNormals(Vector vn0, Vector vn1, Vector vn2) {
+        setNormals(new Vector[]{vn0, vn1, vn2});
     }
 
     @Override
