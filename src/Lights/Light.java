@@ -29,4 +29,6 @@ public abstract class Light extends Object3D {
     public Intersection getIntersection(Ray ray) {
         return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null);
     }
+
+    public abstract double getDistance(Intersection intersection);
 }

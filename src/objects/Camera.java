@@ -6,19 +6,26 @@ import clas.Vector;
 
 import java.awt.*;
 
+import static clas.Vector.scalarMultiplication;
+
 public class Camera extends Object3D{
 
     private double[] fieldOfView = new double[2];
     private double defaultZ = 15.0;
     private int[] resolution = new int[2];
     private double[] nearFarPlanes = new double[2];
+    private Vector forward = new Vector(0, 0, 1);
+    private Vector right = new Vector(1, 0, 0);
+    private Vector up = new Vector(0, 1, 0);
 
-    public Camera(Vector position, double fovH, double fovV, int width, int height, double nearPlane, double farPlane) {
+    public Camera(Vector position, double fovH, double fovV, int width, int height, double nearPlane, double farPlane, Vector direction) {
         super(position, Color.BLACK);
         setFOV(fovH, fovV);
         setResolution(width, height);
         setNearFarPlanes(new double[]{nearPlane, farPlane});
+        lookAt(direction);
     }
+
 
     public double[] getFieldOfView() {
         return fieldOfView;
@@ -90,6 +97,8 @@ public class Camera extends Object3D{
     }
 
     public Vector[][] calculatePositionsToRay() {
+        //double rotateinY =Math.toRadians(30);
+
         // Horizontal boundary
         double angleMaxX = Math.toRadians(getFOVHorizontal() / 2.0);
         double maxX = getDefaultZ() * Math.tan(angleMaxX);
@@ -110,15 +119,51 @@ public class Camera extends Object3D{
             for(int y = 0; y < positions[x].length; y++){
                 double posX = minX + (stepX * x);
                 double posY = maxY - (stepY * y);
-                positions[x][y] = new Vector(posX, posY, posZ);
+
+                Vector pixelPosition = getPosition();
+
+                pixelPosition = Vector.add(pixelPosition,scalarMultiplication(right,posX));
+
+                pixelPosition=Vector.add(pixelPosition,scalarMultiplication(up,posY));
+
+                pixelPosition =Vector.add(pixelPosition,scalarMultiplication(forward,posZ));
+                positions[x][y] = pixelPosition;
+                //positions[x][y] = new Vector(posX, posY, posZ);
+
             }
         }
 
         return positions;
     }
+    public void lookAt(Vector target) {
+        Vector worldUp = new Vector(0, 1, 0);
+
+        forward = Vector.normalize(Vector.substract(target, getPosition()));
+
+        if (Math.abs(Vector.dotProduct(forward, worldUp)) > 0.999) {
+            worldUp = new Vector(1, 0, 0);
+        }
+
+        right = Vector.normalize(Vector.crossProduct(forward, worldUp));
+        up = Vector.normalize(Vector.crossProduct(right, forward));
+    }
 
     @Override
     public Intersection getIntersection(Ray ray) {
         return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null);
+    }
+
+    static int getX(int  r, int t){
+        //double cos0 = t * 0.0174533;
+        double cos0 = Math.toRadians(t);
+
+        int x = (int)(r*Math.cos(cos0));
+        return x;
+    }
+    static int getY(int  r, int t){
+        //double sin0 = t * 0.0174533;
+        double sin0 = Math.toRadians(t);
+        int y = (int)(r*Math.sin(sin0));
+        return y;
     }
 }

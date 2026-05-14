@@ -26,5 +26,9 @@ public class DirectionalLight extends Light{
         return Math.max(Vector.dotProduct(intersection.getNormal(), Vector.scalarMultiplication(getDirection(), -1.0)), 0.0);
     }
 
+    @Override
+    public double getDistance(Intersection intersection) {
+        return 1;
+    }
 }
 

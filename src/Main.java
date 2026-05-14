@@ -18,19 +18,30 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Scene scene01 = new Scene(Color.BLACK);
-        scene01.setCamera(new Camera(new Vector(0, 5, -10), 60, 60, 800,800,0.6, 50.0));
-        scene01.addLight(new pointLight(new Vector(-1,1,3),new Vector(5,5,0),Color.WHITE,1.1));
-        scene01.addLight(new DirectionalLight(new Vector(1.0, 0.0, 0.0), Color.WHITE, 1.1));
+        Scene scene01 = new Scene(Color.BLACK); //0,5,-10
+        scene01.addObject(new Model3D(new Vector(0, 5, -8), // -1,-1,3
+                Model3D.readerOBJ("src/Models/SmallTeapot.obj"),Color.GREEN));
+        scene01.setCamera(new Camera(
+                new Vector(0, 7, -0)/*  position  */,
+                60, 60,
+                800,800,
+                0.6, 50.0,
+                new Vector(0, 4, -8))); /*  direction  */
+        //-1,1,3
+        Color color = new Color(0,100,100);
+        scene01.addLight(new pointLight(new Vector(0,7,-9),Color.WHITE,5));
+        //scene01.addLight(new DirectionalLight(new Vector(0, -1.0, 0.0), color, 1.1));
         //new Vector(0,10,-10),new Vector(5,5,0),Color.white)
-        scene01.addObject(new Sphere(new Vector(0.5, 1, 8), 0.8, Color.RED));
-        scene01.addObject(new Sphere(new Vector(0.1, 1, 6), 0.5, Color.BLUE));
+        Triangle[] floor = new Triangle[]{
+                new Triangle(Vector.ZERO(), new Vector(10, 0, 0), new Vector(10,0,10)),
+                new Triangle(Vector.ZERO(), new Vector(10,0,10), new Vector(0,0,10))};
+        scene01.addObject(new Model3D(new Vector(-5, 5, -13),floor,Color.WHITE));
+        scene01.addObject(new Sphere(new Vector(-2.1, 5.55, -8), 0.5, Color.BLUE));
 
         // Aqui se crean dos triangulos y se agregan a una lista en el metodo
         // addObject se añade esta lista a la lista de objetos que ya tenia la ecena
 
-        scene01.addObject(new Model3D(new Vector(-1, -1, 3),
-                Model3D.readerOBJ("Lowpoly_tree_sample.obj"),Color.GREEN));
+
         /*
         new Triangle[]{
                 new Triangle(Vector.ZERO(), new Vector(1, 0, 0), new Vector(1,-1,0)),
@@ -50,6 +61,7 @@ public class Main {
 
     public static BufferedImage raytrace(Scene scene) {
         Camera mainCamera = scene.getCamera();
+        //mainCamera.lookAt(new Vector(0, 6, -8));
         BufferedImage image = new BufferedImage(mainCamera.getResolutionWidth(), mainCamera.getResolutionHeight(), BufferedImage.TYPE_INT_RGB);
         java.util.List<Object3D> objects = scene.getObjects();
         Vector[][] posRaytrace = mainCamera.calculatePositionsToRay(); //Grid de pixeles
@@ -60,11 +72,12 @@ public class Main {
         for (int i = 0; i < posRaytrace.length; i++) {
             for (int j = 0; j < posRaytrace[i].length; j++) {
                 //posicion en x y z de cada pixel en el Grig
-                double x = posRaytrace[i][j].getX() + pos.getX();
-                double y = posRaytrace[i][j].getY() + pos.getY();
-                double z = posRaytrace[i][j].getZ() + pos.getZ();
+                //double x = posRaytrace[i][j].getX() + pos.getX();
+                //double y = posRaytrace[i][j].getY() + pos.getY();
+                //double z = posRaytrace[i][j].getZ() + pos.getZ();
 
-                Ray ray = new Ray(mainCamera.getPosition(), new Vector(x, y, z));
+                //Ray ray = new Ray(mainCamera.getPosition(), new Vector(x, y, z));
+                Ray ray = new Ray(mainCamera.getPosition(), posRaytrace[i][j]);
                 // en raycast se le dan el rayo y su direccion y la lista de objetos
                 // esto se repite por cada uno de los rayos para dalcular con que objeto
                 // choca el rayo
@@ -78,7 +91,23 @@ public class Main {
                     for (Light light : lights){
                         double nDotL = light.getNDotL(closestIntersection);
                         Color lightColor = light.getColor();
-                        double intensity = light.getIntensity() * nDotL;
+                        double distance2 = light.getDistance(closestIntersection);
+                        double intensity = (light.getIntensity() * nDotL)/distance2;
+
+                        Vector shadowOrigin = Vector.add(
+                                closestIntersection.getPosition(),
+                                Vector.scalarMultiplication(closestIntersection.getNormal(), 0.001)
+                        );
+
+                        //Para saber si hay sombra en un pixel creamos un rayo desde la interseccion a la luz
+                        Ray shadowRay = new Ray(shadowOrigin,light.getPosition());
+                        //vemos si ese rayo choca con algun objeto
+                        Intersection shadow = raycast(shadowRay, objects, closestIntersection.getObject());
+                        //si choca con algo entra en el if
+                        //Vemos si el objeto esta entre la interseccion y la luz
+                        if(shadow != null && shadow.getDistance() < distance2){
+                           intensity =0;
+                        }
 
                         double[] lightColors = new double[]{lightColor.getRed() / 255.0, lightColor.getGreen() / 255.0, lightColor.getBlue() / 255.0};
                         double[] objColors = new double[]{objColor.getRed() / 255.0, objColor.getGreen() / 255.0, objColor.getBlue() / 255.0};
@@ -107,6 +136,12 @@ public class Main {
         float red = (float) Math.clamp((original.getRed() / 255.0) + (otherColor.getRed() / 255.0), 0.0, 1.0);
         float green = (float) Math.clamp((original.getGreen() / 255.0) + (otherColor.getGreen() / 255.0), 0.0, 1.0);
         float blue = (float) Math.clamp((original.getBlue() / 255.0) + (otherColor.getBlue() / 255.0), 0.0, 1.0);
+        return new Color(red, green, blue);
+    }
+    public static Color substractColor(Color original, Color otherColor) {
+        float red = (float) Math.clamp((original.getRed() / 255.0) - (otherColor.getRed() / 255.0), 0.0, 1.0);
+        float green = (float) Math.clamp((original.getGreen() / 255.0) - (otherColor.getGreen() / 255.0), 0.0, 1.0);
+        float blue = (float) Math.clamp((original.getBlue() / 255.0) - (otherColor.getBlue() / 255.0), 0.0, 1.0);
         return new Color(red, green, blue);
     }
 

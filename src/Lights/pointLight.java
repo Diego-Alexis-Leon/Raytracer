@@ -6,11 +6,11 @@ import clas.Vector;
 import java.awt.*;
 
 public class pointLight extends Light{
-    private Vector direction;
+    //private Vector direction;
 
-    public pointLight(Vector position, Vector direction, Color ligthColor, double intensity){
+    public pointLight(Vector position, Color ligthColor, double intensity){
         super(position,ligthColor,intensity);
-        this. direction = direction;
+        //this. direction = direction;
     }
 
     public Color calculateDiffuse(Intersection intersection){
@@ -43,4 +43,22 @@ public class pointLight extends Light{
         return Math.max(Vector.dotProduct(intersection.getNormal(), L),0.0);
         //return Math.max(Vector.dotProduct(intersection.getNormal(), Vector.scalarMultiplication(getDirection(), -1.0)), 0.0);
     }
+
+    @Override
+    public double getDistance( Intersection intersection) {
+        Vector L = getPosition();
+        Vector I = intersection.getPosition();
+
+        double zL = L.getZ();
+        double yL = L.getY();
+        double xL = L.getX();
+
+        double xI = I.getX();
+        double yI = I.getY();
+        double zI = I.getX();
+
+        double distance2 = (Math.pow(xI-xL,2)+Math.pow(yI-yL,2)+Math.pow(zI-zL,2));
+        return Math.sqrt(distance2);
+    }
+
 }
