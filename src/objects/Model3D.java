@@ -1,8 +1,6 @@
 package objects;
 
-import clas.Barycentric;
-import clas.Intersection;
-import clas.Ray;
+import clas.*;
 import clas.Vector;
 
 import java.awt.*;
@@ -15,8 +13,8 @@ import java.util.List;
 public class Model3D extends Object3D {
     private List<Triangle> triangles;
 
-    public Model3D(Vector position, Triangle[] triangles, Color color) {
-        super(position, color);
+    public Model3D(Vector position, Triangle[] triangles, Color color, double reflection, double transparency, double refractiveIndex) {
+        super(position, color,reflection, transparency, refractiveIndex);
         setTriangles(triangles);
     }
 
@@ -45,6 +43,7 @@ public class Model3D extends Object3D {
         double distance = -1;
         Vector position = Vector.ZERO();
         Vector normal = Vector.ZERO();
+        Vector2 uv = Vector2.ZERO();
 
         for(Triangle triangle : getTriangles()){
             Intersection intersection = triangle.getIntersection(ray);
@@ -63,9 +62,17 @@ public class Model3D extends Object3D {
                 /*/
                 normal = Vector.ZERO();
                 double[] uVw = Barycentric.CalculateBarycentricCoordinates(position, triangle);
+                Vector2[] triangleUVs = triangle.getTextureCoordinates();
+                if (triangleUVs != null && triangleUVs.length == 3) {
+                    for (int i = 0; i < uVw.length; i++) {
+                        uv = Vector2.add(uv,Vector2.scalarMultiplication(triangleUVs[i], uVw[i]));
+                    }
+                }
+
                 Vector[] normals = triangle.getNormals();
                 for(int i = 0; i < uVw.length; i++){
                     normal = Vector.add(normal, Vector.scalarMultiplication(normals[i], uVw[i]));
+
                 }
             }
         }
@@ -73,8 +80,9 @@ public class Model3D extends Object3D {
         if(distance == -1){
             return null;
         }
+        normal = Vector.normalize(normal);
 
-        return new Intersection(position, distance, normal, this);
+        return new Intersection(position, distance, normal, this, uv);
     }
 
     public static Triangle[] readerOBJ(String path) throws IOException {
@@ -95,6 +103,7 @@ public class Model3D extends Object3D {
         List<Triangle> temporalList = new ArrayList<>();
         List<Vector> vectors = new ArrayList<>();
         List<Vector> vectorsN = new ArrayList<>();
+        List<Vector2> vectorsT = new ArrayList<>();
         List<int[]> caras = new ArrayList<>();
         List<Integer> smoothingGroupsCaras = new ArrayList<>();
 
@@ -131,6 +140,12 @@ public class Model3D extends Object3D {
                 vectorsN.add(new Vector(x,y,z));
             }
 
+            if (partes[0].equals("vt")) {
+                double u = Double.parseDouble(partes[1]);
+                double v = Double.parseDouble(partes[2]);
+                vectorsT.add(new Vector2(u, v));
+            }
+
             if(partes[0].equals("s")) {
                 if(partes.length > 1) {
                     if(partes[1].equals("off")){
@@ -157,10 +172,15 @@ public class Model3D extends Object3D {
                 String[] p1 = partes[1].trim().split("/");
                 String[] p2 = partes[2].trim().split("/");
                 String[] p3 = partes[3].trim().split("/");
+                //Aqui se obtiene el indice de los vertices, texturas y las normales
                 int v0 = Integer.parseInt(p1[0]) - 1;
                 int v1 = Integer.parseInt(p2[0]) - 1;
                 int v2 = Integer.parseInt(p3[0]) - 1;
-                //Aqui se obtiene el indice de los vertices y las normales
+
+                int t0 = Integer.parseInt(p1[1]) - 1;
+                int t1 = Integer.parseInt(p2[1]) - 1;
+                int t2 = Integer.parseInt(p3[1]) - 1;
+
                 int n0 = Integer.parseInt(p1[2]) -1;
                 int n1= Integer.parseInt(p2[2]) -1;
                 int n2 = Integer.parseInt(p3[2]) -1;
@@ -168,14 +188,15 @@ public class Model3D extends Object3D {
                 if (partes.length > 4){ // verifica si una cara tiene 3 o 4 vertices.
                     String[] p4 = partes[4].trim().split("/");
                     int v3 = Integer.parseInt(p4[0]) - 1;
+                    int t3 = Integer.parseInt(p4[1]) - 1;
                     int n3 = Integer.parseInt(p4[2]) -1;
 
-                    caras.add(new int[]{v0, v1, v2, v3, n0, n1, n2, n3});
+                    caras.add(new int[]{v0, v1, v2, v3, t0, t1, t2, t3, n0, n1, n2, n3});
                     smoothingGroupsCaras.add(smoothingGroup);
                     //System.out.println(v1+" "+v2+" "+v3+" "+v4);
                     //System.out.println(partes[0]+" "+p1[0]+" "+p2[0]+" "+p3[0]+" "+p4[0]);
                 }else {
-                    caras.add(new int[]{v0, v1, v2, n0, n1, n2});
+                    caras.add(new int[]{v0, v1, v2, t0, t1, t2, n0, n1, n2});
                     smoothingGroupsCaras.add(smoothingGroup);
                     //System.out.println(v1+" "+v2+" "+v3);
                     //System.out.println(partes[0]+" "+p1[0]+" "+p2[0]+" "+p3[0]);
@@ -195,14 +216,16 @@ public class Model3D extends Object3D {
                 trianglesInMap = new ArrayList<>();
             }
 
-            if (triangle.length > 6){ // verifica si una cara tiene 3 o 4 vertices.
+            if (triangle.length > 9){ // verifica si una cara tiene 3 o 4 vertices.
                 Vector[] vertices1 = {vectors.get(triangle[1]),vectors.get(triangle[0]),vectors.get(triangle[2])};
-                Vector[] normals1 = {vectorsN.get(triangle[5]),vectorsN.get(triangle[4]),vectorsN.get(triangle[6])};
-                // caras= {v0,v1,v2,v3,n4,n5,n6,n7}
+                Vector[] normals1 = {vectorsN.get(triangle[9]), vectorsN.get(triangle[8]), vectorsN.get(triangle[10])};
+                Vector2[] textures1 = {vectorsT.get(triangle[5]), vectorsT.get(triangle[4]), vectorsT.get(triangle[6])};
+                // caras= {v0,v1,v2,v3,t4,t5,t6,t7,n8,n9,n10,n11}
                 Vector[] vertices2 = {vectors.get(triangle[2]),vectors.get(triangle[0]),vectors.get(triangle[3])};
-                Vector[] normals2 = {vectorsN.get(triangle[6]),vectorsN.get(triangle[4]),vectorsN.get(triangle[7])};
-                Triangle t1 = new Triangle(vertices1,normals1);
-                Triangle t2 = new Triangle(vertices2,normals2);
+                Vector2[] textures2 = {vectorsT.get(triangle[6]), vectorsT.get(triangle[4]),vectorsT.get(triangle[7])};
+                Vector[] normals2 = {vectorsN.get(triangle[10]), vectorsN.get(triangle[8]), vectorsN.get(triangle[11])};
+                Triangle t1 = new Triangle(vertices1,normals1,textures1);
+                Triangle t2 = new Triangle(vertices2,normals2,textures2);
 
 
                 temporalList.add(t1);
@@ -218,9 +241,10 @@ public class Model3D extends Object3D {
                 //System.out.println("Vertices="+triangle.length+" "+triangle[0]+" "+triangle[1]+" "+triangle[2]+" "+triangle[3]);
             }else {
                 Vector[] vertices1 = {vectors.get(triangle[1]),vectors.get(triangle[0]),vectors.get(triangle[2])};
-                Vector[] normals1 = {vectorsN.get(triangle[4]),vectorsN.get(triangle[3]),vectorsN.get(triangle[5])};
+                Vector[] normals1 = {vectorsN.get(triangle[7]), vectorsN.get(triangle[6]), vectorsN.get(triangle[8])};
+                Vector2[] textures1 = {vectorsT.get(triangle[4]), vectorsT.get(triangle[3]), vectorsT.get(triangle[5])};
                 // caras= {v0,v1,v2,n3,n4,n5}
-                Triangle t = new Triangle(vertices1,normals1);
+                Triangle t = new Triangle(vertices1,normals1,textures1);
 
                 temporalList.add(t);
                 trianglesInMap.add(t);

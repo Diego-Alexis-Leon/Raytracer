@@ -1,27 +1,26 @@
 package objects;
 
-import clas.Interface;
-import clas.Intersection;
-import clas.Ray;
-import clas.Vector;
+import clas.*;
 
 public class Triangle implements Interface {
     public static final double EPSILON = 0.0000001;
     private Vector[] vertices;
     private Vector[] normals;
+    private Vector2[] textureCoordinates;
 
     public Triangle(Vector v0, Vector v1, Vector v2) {
         setVertices(v0, v1, v2);
         setNormals(null);
     }
 
-    public Triangle(Vector[] vertices, Vector[] normals) {
+    public Triangle(Vector[] vertices, Vector[] normals, Vector2[] textureCoorinates) {
         if(vertices.length == 3){
             setVertices(vertices[0], vertices[1], vertices[2]);
         } else {
             setVertices(Vector.ZERO(),Vector.ZERO(),Vector.ZERO());
         }
         setNormals(normals);
+        setTextureCoordinates(textureCoorinates);
     }
 
     public Vector[] getVertices() {
@@ -81,7 +80,7 @@ public class Triangle implements Interface {
 
     @Override
     public Intersection getIntersection(Ray ray) {
-        Intersection intersection = new Intersection(null, -1, null, null);
+        Intersection intersection = new Intersection(null, -1, null, null, null);
 
         Vector[] vert = getVertices();
         Vector v2v0 = Vector.substract(vert[2], vert[0]);
@@ -102,6 +101,15 @@ public class Triangle implements Interface {
         }
 
         return intersection;
+    }
+
+    public Vector2[] getTextureCoordinates() {
+        return textureCoordinates;
+    }
+
+
+    public void setTextureCoordinates(Vector2[] textureCoordinates) {
+        this.textureCoordinates = textureCoordinates;
     }
 }
 

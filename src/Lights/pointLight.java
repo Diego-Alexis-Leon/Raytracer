@@ -55,7 +55,7 @@ public class pointLight extends Light{
 
         double xI = I.getX();
         double yI = I.getY();
-        double zI = I.getX();
+        double zI = I.getZ();
 
         double distance2 = (Math.pow(xI-xL,2)+Math.pow(yI-yL,2)+Math.pow(zI-zL,2));
         return Math.sqrt(distance2);

@@ -11,7 +11,7 @@ public abstract class Light extends Object3D {
     private double intensity;
 
     public Light(Vector position, Color color, double intensity) {
-        super(position, color);
+        super(position, color,0,0,0);
         setIntensity(intensity);
     }
 
@@ -27,7 +27,7 @@ public abstract class Light extends Object3D {
 
     @Override
     public Intersection getIntersection(Ray ray) {
-        return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null);
+        return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null, null);
     }
 
     public abstract double getDistance(Intersection intersection);

@@ -19,7 +19,7 @@ public class Camera extends Object3D{
     private Vector up = new Vector(0, 1, 0);
 
     public Camera(Vector position, double fovH, double fovV, int width, int height, double nearPlane, double farPlane, Vector direction) {
-        super(position, Color.BLACK);
+        super(position, Color.BLACK,0,0,0);
         setFOV(fovH, fovV);
         setResolution(width, height);
         setNearFarPlanes(new double[]{nearPlane, farPlane});
@@ -150,7 +150,7 @@ public class Camera extends Object3D{
 
     @Override
     public Intersection getIntersection(Ray ray) {
-        return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null);
+        return new Intersection(Vector.ZERO(), -1, Vector.ZERO(), null,null);
     }
 
     static int getX(int  r, int t){

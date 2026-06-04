@@ -10,12 +10,14 @@ public class Intersection {
     private Vector position;
     private Vector normal;
     private Object3D object;
+    private Vector2 uv;
 
-    public Intersection(Vector position, double distance, Vector normal, Object3D object) {
+    public Intersection(Vector position, double distance, Vector normal, Object3D object, Vector2 uv) {
         setPosition(position);
         setDistance(distance);
         setNormal(normal);
         setObject(object);
+        setUv(uv);
     }
 
     public double getDistance() {
@@ -50,4 +52,7 @@ public class Intersection {
         this.object = object;
     }
 
+    public Vector2 getUv() {return uv; }
+
+    public void setUv(Vector2 uv) {this.uv = uv;}
 }

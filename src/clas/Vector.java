@@ -82,4 +82,31 @@ public class Vector {
     public static Vector scalarMultiplication(Vector vectorA, double scalar) {
         return new Vector(vectorA.getX() * scalar, vectorA.getY() * scalar, vectorA.getZ() * scalar);
     }
+    //Calcula la direccion de un rayo reflejado usando la normal de el objeto reflectivo y el rayo de incidencia
+    public static Vector dirReflection(Vector incident, Vector normal){
+        Vector i = Vector.normalize(incident);
+        Vector n = Vector.normalize(normal);
+
+        return Vector.normalize(
+                Vector.substract(i,Vector.scalarMultiplication(n, 2.0 * Vector.dotProduct(i, n))));
+    }
+
+    public static Vector refract(Vector incident, Vector normal, double n1, double n2) {
+        Vector I = Vector.normalize(incident);
+        Vector N = Vector.normalize(normal);
+
+        double cosI = -Vector.dotProduct(N, I);
+        double eta = n1 / n2;
+        double k = 1.0 - eta * eta * (1.0 - cosI * cosI);
+
+        if (k < 0) {
+            return null; // reflexión interna total
+        }
+
+        return Vector.normalize(
+                Vector.add(Vector.scalarMultiplication(I, eta),
+                        Vector.scalarMultiplication(N, eta * cosI - Math.sqrt(k))
+                )
+        );
+    }
 }
